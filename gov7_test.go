@@ -98,7 +98,10 @@ func TestApply(t *testing.T) {
 		t.Fatal("could not get target function")
 	}
 
-	result = v7.Apply(fn, global, ary)
+	result, err = v7.Apply(fn, global, ary)
+	if err != nil {
+		t.Fatalf("error calling function: %s", err.Error())
+	}
 
 	s, err := v7.ToString(result)
 	if err != nil {

@@ -52,18 +52,7 @@ func (v7 *V7) Exec(code string) (Val, error) {
 	// DEBUG
 	//fmt.Println(v7.ToJSON(v, 2048))
 
-	switch e {
-	case C.V7_OK:
-		return v, nil
-	case C.V7_SYNTAX_ERROR:
-		// the document says the result is undefiend, but actually it's an error object
-		return v, errors.New("parse error: " + v7.ToJSON(v, 2048))
-	case C.V7_EXEC_EXCEPTION:
-		return v, errors.New("runtime error: " + v7.ToJSON(v, 2048))
-	case C.V7_STACK_OVERFLOW:
-		return v, errors.New("stack overflow")
-	}
-	return v, errors.New("unknown error")
+	return v, v7.convertError(v, e)
 }
 
 func (v7 *V7) IsUndefined(v Val) bool {
@@ -146,9 +135,30 @@ func (v7 *V7) ArrayPush(ary Val, v Val) {
 	C.v7_array_push((*C.struct_v7)(v7), C.v7_val_t(ary), C.v7_val_t(v))
 }
 
-/*
- * Unlike Exec, there is no way to tell if Apply threw an error
- */
-func (v7 *V7) Apply(f Val, thisObj Val, args Val) Val {
-	return Val(C.v7_apply((*C.struct_v7)(v7), C.v7_val_t(f), C.v7_val_t(thisObj), C.v7_val_t(args)))
+func (v7 *V7) Apply(fn Val, thisObj Val, args Val) (Val, error) {
+	var result C.v7_val_t
+
+	e := C.v7_apply((*C.struct_v7)(v7), &result, C.v7_val_t(fn), C.v7_val_t(thisObj), C.v7_val_t(args))
+
+	v := Val(result)
+
+	// DEBUG
+	//fmt.Println(v7.ToJSON(v, 2048))
+
+	return v, v7.convertError(v, e)
+}
+
+func (v7 *V7) convertError(v Val, e C.enum_v7_err) error {
+	switch e {
+	case C.V7_OK:
+		return nil
+	case C.V7_SYNTAX_ERROR:
+		// the document says the result is undefiend, but actually it's an error object
+		return errors.New("parse error: " + v7.ToJSON(v, 2048))
+	case C.V7_EXEC_EXCEPTION:
+		return errors.New("runtime error: " + v7.ToJSON(v, 2048))
+	case C.V7_STACK_OVERFLOW:
+		return errors.New("stack overflow")
+	}
+	return errors.New("unknown error")
 }
