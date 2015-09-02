@@ -2,6 +2,8 @@
 
 Go binding for V7 JavaScript engine.
 
+[![Build Status](https://travis-ci.org/edvakf/gov7.svg)](https://travis-ci.org/edvakf/gov7)
+
 ## Updating v7
 
 v7 was added as a git subtree like this;
