@@ -7,7 +7,8 @@ package gov7
 #include <stdlib.h>
 #include "v7/v7.c"
 
-#cgo CFLAGS: -DV7_NO_FS -DV7_LARGE_AST
+#cgo CFLAGS: -O3 -DV7_NO_FS -DV7_LARGE_AST
+#cgo LDFLAGS: -lm
 
 */
 import "C"
