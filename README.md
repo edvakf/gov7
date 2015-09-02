@@ -2,7 +2,7 @@
 
 Go binding for V7 JavaScript engine.
 
-[![Build Status](https://travis-ci.org/edvakf/gov7.svg)](https://travis-ci.org/edvakf/gov7)
+[![Build Status](https://travis-ci.org/edvakf/gov7.svg)](https://travis-ci.org/edvakf/gov7) [![Coverage Status](https://coveralls.io/repos/edvakf/gov7/badge.svg?branch=master&service=github)](https://coveralls.io/github/edvakf/gov7?branch=master)
 
 ## Updating v7
 
