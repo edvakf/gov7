@@ -19,3 +19,9 @@ To update v7, do `merge --squash`
 $ git merge --squash -s subtree --no-commit v7_origin
 $ git commit
 ```
+
+## Related project
+
+j7 - Filter stdin to stdout with JavaScript
+
+* https://github.com/edvakf/j7
