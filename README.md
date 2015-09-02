@@ -1,6 +1,6 @@
 # gov7
 
-Go binding for V7 JavaScript engine.
+Go binding for the [V7 JavaScript engine](https://github.com/cesanta/v7), a very small JavaScript engine for embedded devices.
 
 [![Build Status](https://travis-ci.org/edvakf/gov7.svg)](https://travis-ci.org/edvakf/gov7) [![Coverage Status](https://coveralls.io/repos/edvakf/gov7/badge.svg?branch=master&service=github)](https://coveralls.io/github/edvakf/gov7?branch=master)
 
@@ -25,3 +25,9 @@ $ git commit
 j7 - Filter stdin to stdout with JavaScript
 
 * https://github.com/edvakf/j7
+
+## LICENSE
+
+Because V7 is distributed under the GPLv2, gov7 has also adopted GPLv2.
+
+For the details, please refer to the LICENSE file under the v7 directory.
