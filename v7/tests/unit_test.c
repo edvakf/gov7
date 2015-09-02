@@ -495,6 +495,30 @@ static const char *test_runtime(void) {
   return NULL;
 }
 
+static const char *test_apply(void) {
+  struct v7 *v7 = v7_create();
+  val_t v, fn;
+
+  fn = v7_get(v7, v7->global_object, "test0", 5); /* no such function */
+  ASSERT_EQ(v7_apply(v7, &v, fn, v7->global_object, v7_create_undefined()),
+            V7_EXEC_EXCEPTION);
+
+  ASSERT_EQ(v7_exec(v7, &v, "function test1(){return 1}"), V7_OK);
+  fn = v7_get(v7, v7->global_object, "test1", 5);
+  ASSERT_EQ(v7_apply(v7, &v, fn, v7->global_object, v7_create_undefined()),
+            V7_OK);
+  ASSERT(check_num(v7, v, 1));
+
+  ASSERT_EQ(v7_exec(v7, &v, "function test2(){throw 2}"), V7_OK);
+  fn = v7_get(v7, v7->global_object, "test2", 5);
+  ASSERT_EQ(v7_apply(v7, &v, fn, v7->global_object, v7_create_undefined()),
+            V7_EXEC_EXCEPTION);
+  ASSERT(check_num(v7, v, 2));
+
+  v7_destroy(v7);
+  return NULL;
+}
+
 static const char *test_dense_arrays(void) {
   struct v7 *v7 = v7_create();
   val_t a;
@@ -530,6 +554,10 @@ static const char *test_dense_arrays(void) {
   ASSERT_EVAL_EQ(v7, "a=mka(1,2,3);a.slice(1,3)", "[2,3]");
 
   ASSERT_EVAL_NUM_EQ(v7, "a=mka(1,2,3);a.indexOf(3)", 2);
+
+  /* ensure that a zero length dense arrays is correctly recognized */
+  a = v7_create_dense_array(v7);
+  ASSERT(v7_next_prop(v7, a, NULL) == NULL);
 
   v7_destroy(v7);
   return NULL;
@@ -851,6 +879,17 @@ static char *read_file(const char *path, size_t *size) {
     fclose(fp);
   }
   return data;
+}
+
+static const char *test_parser_large_ast(void) {
+  struct ast a;
+  struct v7 *v7 = v7_create();
+  size_t script_len;
+  char *script = read_file("large_ast.js", &script_len);
+
+  ast_init(&a, 0);
+  ASSERT_EQ(parse(v7, &a, script, 0), V7_AST_TOO_LARGE);
+  return NULL;
 }
 
 static const char *test_ecmac(void) {
@@ -1206,6 +1245,10 @@ static const char *test_interpreter(void) {
   ASSERT_EVAL_EQ(v7, "o.x", "2");
 
   c = "\"undefined\"";
+  ASSERT_EVAL_EQ(v7, "x=undefined; typeof x", c);
+  c = "\"undefined\"";
+  ASSERT_EVAL_EQ(v7, "typeof undefined", c);
+  c = "\"undefined\"";
   ASSERT_EVAL_EQ(v7, "typeof dummyx", c);
   c = "\"object\"";
   ASSERT_EVAL_EQ(v7, "typeof null", c);
@@ -1560,6 +1603,23 @@ static const char *test_json_parse(void) {
   /* big string, will cause malloc */
   ASSERT_EVAL_EQ(v7, c1, c2);
 
+  c1 = "\"\\n\"";
+  ASSERT_EVAL_EQ(v7, c1, c1);
+  c1 = "\"\\t\"";
+  ASSERT_EVAL_EQ(v7, c1, c1);
+
+  {
+    val_t res;
+    const char *s;
+    size_t len;
+
+    v7_exec(v7, &res, "JSON.stringify('\"\\n\"')");
+    s = v7_to_string(v7, &res, &len);
+
+    c1 = "\"\\\"\\n\\\"\"";
+    ASSERT_STREQ(s, c1);
+  }
+
   v7_destroy(v7);
   return NULL;
 }
@@ -1883,7 +1943,11 @@ static const char *run_all_tests(const char *filter, double *total_elapsed) {
   RUN_TEST(test_native_functions);
   RUN_TEST(test_stdlib);
   RUN_TEST(test_runtime);
+  RUN_TEST(test_apply);
   RUN_TEST(test_parser);
+#ifndef V7_LARGE_AST
+  RUN_TEST(test_parser_large_ast);
+#endif
   RUN_TEST(test_interpreter);
   RUN_TEST(test_interp_unescape);
   RUN_TEST(test_strings);

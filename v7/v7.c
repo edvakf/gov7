@@ -1,3 +1,7 @@
+#ifdef V7_MODULE_LINES
+#line 1 "./v7.h"
+/**/
+#endif
 /*
  * Copyright (c) 2013-2014 Cesanta Software Limited
  * All rights reserved
@@ -81,7 +85,13 @@ struct v7 *v7_create_opt(struct v7_create_opts);
 /* Destroy V7 instance */
 void v7_destroy(struct v7 *);
 
-enum v7_err { V7_OK, V7_SYNTAX_ERROR, V7_EXEC_EXCEPTION, V7_STACK_OVERFLOW };
+enum v7_err {
+  V7_OK,
+  V7_SYNTAX_ERROR,
+  V7_EXEC_EXCEPTION,
+  V7_STACK_OVERFLOW,
+  V7_AST_TOO_LARGE
+};
 
 /*
  * Execute JavaScript `js_code`, store result in `result` variable.
@@ -275,7 +285,8 @@ int v7_is_true(struct v7 *v7, v7_val_t v);
  * Call function `func` with arguments `args`, using `this_obj` as `this`.
  * `args` could be either undefined value, or be an array with arguments.
  */
-v7_val_t v7_apply(struct v7 *, v7_val_t func, v7_val_t this_obj, v7_val_t args);
+enum v7_err v7_apply(struct v7 *, v7_val_t *result, v7_val_t func,
+                     v7_val_t this_obj, v7_val_t args);
 
 /* Throw an exception (Error object) with given formatted message. */
 void v7_throw(struct v7 *, const char *msg_fmt, ...);
@@ -363,7 +374,7 @@ void v7_interrupt(struct v7 *v7);
 /*
  * Tells the GC about a JS value variable/field owned
  * by C code.
- * *
+ *
  * User C code should own v7_val_t variables
  * if the value's lifetime crosses any invocation
  * to the v7 runtime that creates new objects or new
@@ -393,6 +404,9 @@ void v7_own(struct v7 *v7, v7_val_t *v);
  */
 int v7_disown(struct v7 *v7, v7_val_t *v);
 
+/* Prints stack trace recorded in the exception `e` to file `f` */
+void v7_fprint_stack_trace(FILE *f, struct v7 *v7, v7_val_t e);
+
 int v7_main(int argc, char *argv[], void (*init_func)(struct v7 *),
             void (*fini_func)(struct v7 *));
 
@@ -401,6 +415,10 @@ int v7_main(int argc, char *argv[], void (*init_func)(struct v7 *),
 #endif /* __cplusplus */
 
 #endif /* V7_HEADER_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/v7_features.h"
+/**/
+#endif
 #ifndef V7_FEATURES_H_INCLUDED
 #define V7_FEATURES_H_INCLUDED
 
@@ -413,8 +431,15 @@ int v7_main(int argc, char *argv[], void (*init_func)(struct v7 *),
 #endif
 
 /* Only one will actually be used based on V7_BUILD_PROFILE. */
+/* Amalgamated: #include "features_minimal.h" */
+/* Amalgamated: #include "features_medium.h" */
+/* Amalgamated: #include "features_full.h" */
 
 #endif /* V7_FEATURES_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/features_full.h"
+/**/
+#endif
 #if V7_BUILD_PROFILE == V7_BUILD_PROFILE_FULL
 /*
  * DO NOT EDIT.
@@ -431,6 +456,7 @@ int v7_main(int argc, char *argv[], void (*init_func)(struct v7 *),
 #define V7_ENABLE__Date__toJSON 1
 #define V7_ENABLE__Date__toLocaleString 1
 #define V7_ENABLE__Date__toString 1
+#define V7_ENABLE__File__list 1
 #define V7_ENABLE__Function__call 1
 #define V7_ENABLE__Math 1
 #define V7_ENABLE__Math__abs 1
@@ -467,12 +493,17 @@ int v7_main(int argc, char *argv[], void (*init_func)(struct v7 *),
 #define V7_ENABLE__Object__preventExtensions 1
 #define V7_ENABLE__Object__propertyIsEnumerable 1
 #define V7_ENABLE__RegExp 1
+#define V7_ENABLE__StackTrace 1
 #define V7_ENABLE__String__localeCompare 1
 #define V7_ENABLE__String__localeLowerCase 1
 #define V7_ENABLE__String__localeUpperCase 1
 #define V7_ENABLE__UTF 1
 
 #endif /* V7_BUILD_PROFILE == V7_BUILD_PROFILE_FULL */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/features_medium.h"
+/**/
+#endif
 #if V7_BUILD_PROFILE == V7_BUILD_PROFILE_MEDIUM
 
 #define V7_ENABLE__Date 1
@@ -484,11 +515,19 @@ int v7_main(int argc, char *argv[], void (*init_func)(struct v7 *),
 #define V7_ENABLE__UTF 1
 
 #endif /* V7_BUILD_PROFILE == V7_BUILD_PROFILE_MEDIUM */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/features_minimal.h"
+/**/
+#endif
 #if V7_BUILD_PROFILE == V7_BUILD_PROFILE_MINIMAL
 
 /* This space is intentionally left blank. */
 
 #endif /* V7_BUILD_PROFILE == V7_BUILD_PROFILE_MINIMAL */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/license.h"
+/**/
+#endif
 /*
  * Copyright (c) 2013-2014 Cesanta Software Limited
  * All rights reserved
@@ -514,6 +553,10 @@ int v7_main(int argc, char *argv[], void (*init_func)(struct v7 *),
 #define V7_PRIVATE static
 #define V7_EXTERN static
 #endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/tokenizer.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -522,6 +565,7 @@ int v7_main(int argc, char *argv[], void (*init_func)(struct v7 *),
 #ifndef V7_TOKENIZER_H_INCLUDED
 #define V7_TOKENIZER_H_INCLUDED
 
+/* Amalgamated: #include "internal.h" */
 
 enum v7_tok {
   TOK_END_OF_INPUT,
@@ -651,6 +695,10 @@ V7_PRIVATE int is_reserved_word_token(enum v7_tok tok);
 #endif /* __cplusplus */
 
 #endif /* V7_TOKENIZER_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/mbuf.h"
+/**/
+#endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -729,6 +777,10 @@ void mbuf_trim(struct mbuf *);
 #endif /* __cplusplus */
 
 #endif /* MBUF_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/utf.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -799,6 +851,10 @@ char *utfutf(char *s1, char *s2);
 }
 #endif /* __cplusplus */
 #endif /* _UTF_H_ */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/osdep.h"
+/**/
+#endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -863,6 +919,9 @@ char *utfutf(char *s1, char *s2);
 
 #ifdef PICOTCP
 #define time(x) PICO_TIME()
+/* Amalgamated: #include "pico_config.h" */
+/* Amalgamated: #include "pico_bsd_sockets.h" */
+/* Amalgamated: #include "pico_bsd_syscalls.h" */
 #ifndef SOMAXCONN
 #define SOMAXCONN (16)
 #endif
@@ -924,10 +983,17 @@ typedef unsigned __int64 uint64_t;
 typedef __int64 int64_t;
 typedef SOCKET sock_t;
 typedef uint32_t in_addr_t;
+#ifndef UINT16_MAX
+#define UINT16_MAX 65535
+#endif
+#ifndef UINT32_MAX
+#define UINT32_MAX 4294967295
+#endif
 #ifndef pid_t
 #define pid_t HANDLE
 #endif
 #define INT64_FMT "I64d"
+#define SIZE_T_FMT "Iu"
 #ifdef __MINGW32__
 typedef struct stat ns_stat_t;
 #else
@@ -986,6 +1052,7 @@ struct dirent *readdir(DIR *dir);
 
 #define INVALID_SOCKET (-1)
 #define INT64_FMT PRId64
+#define SIZE_T_FMT "zu"
 #define to64(x) strtoll(x, NULL, 10)
 typedef int sock_t;
 typedef struct stat ns_stat_t;
@@ -997,14 +1064,16 @@ int64_t strtoll(const char *str, char **endptr, int base);
 #endif
 #endif /* !_WIN32 */
 
-#ifdef NS_ENABLE_DEBUG
-#define DBG(x)                  \
+#define __DBG(x)                \
   do {                          \
     printf("%-20s ", __func__); \
     printf x;                   \
     putchar('\n');              \
     fflush(stdout);             \
   } while (0)
+
+#ifdef NS_ENABLE_DEBUG
+#define DBG __DBG
 #else
 #define DBG(x)
 #endif
@@ -1014,6 +1083,10 @@ int64_t strtoll(const char *str, char **endptr, int base);
 #endif
 
 #endif /* OSDEP_HEADER_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/base64.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1033,6 +1106,10 @@ int cs_base64_decode(const unsigned char *s, int len, char *dst);
 }
 #endif
 #endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/md5.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1041,6 +1118,7 @@ int cs_base64_decode(const unsigned char *s, int len, char *dst);
 #ifndef MD5_HEADER_DEFINED
 #define MD5_HEADER_DEFINED
 
+/* Amalgamated: #include "osdep.h" */
 
 #ifdef __cplusplus
 extern "C" {
@@ -1061,6 +1139,10 @@ void MD5_Final(unsigned char *md, MD5_CTX *c);
 #endif /* __cplusplus */
 
 #endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/sha1.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1069,6 +1151,7 @@ void MD5_Final(unsigned char *md, MD5_CTX *c);
 #if !defined(NS_SHA1_HEADER_INCLUDED) && !defined(DISABLE_SHA1)
 #define NS_SHA1_HEADER_INCLUDED
 
+/* Amalgamated: #include "osdep.h" */
 
 #ifdef __cplusplus
 extern "C" {
@@ -1090,6 +1173,10 @@ void hmac_sha1(const unsigned char *key, size_t key_len,
 }
 #endif /* __cplusplus */
 #endif /* NS_SHA1_HEADER_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/str_util.h"
+/**/
+#endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -1111,6 +1198,10 @@ int c_vsnprintf(char *buf, size_t buf_size, const char *format, va_list ap);
 #ifdef __cplusplus
 }
 #endif
+#endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../builtin/builtin.h"
+/**/
 #endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
@@ -1246,6 +1337,10 @@ void init_socket(struct v7 *);
 void init_crypto(struct v7 *);
 
 #endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/ast.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1255,6 +1350,7 @@ void init_crypto(struct v7 *);
 #define AST_H_INCLUDED
 
 #include <stdio.h>
+/* Amalgamated: #include "internal.h" */
 
 #if defined(__cplusplus)
 extern "C" {
@@ -1378,6 +1474,7 @@ enum ast_tag {
 struct ast {
   struct mbuf mbuf;
   int refcnt;
+  int has_overflow;
 };
 
 typedef unsigned long ast_off_t;
@@ -1444,6 +1541,10 @@ V7_PRIVATE void ast_skip_tree(struct ast *, ast_off_t *);
 #endif /* __cplusplus */
 
 #endif /* AST_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/parser.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1452,6 +1553,7 @@ V7_PRIVATE void ast_skip_tree(struct ast *, ast_off_t *);
 #ifndef V7_PARSER_H_INCLUDED
 #define V7_PARSER_H_INCLUDED
 
+/* Amalgamated: #include "internal.h" */
 
 #if defined(__cplusplus)
 extern "C" {
@@ -1477,6 +1579,10 @@ V7_PRIVATE enum v7_err parse(struct v7 *, struct ast *, const char *, int);
 #endif /* __cplusplus */
 
 #endif /* V7_PARSER_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/mm.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1485,6 +1591,7 @@ V7_PRIVATE enum v7_err parse(struct v7 *, struct ast *, const char *, int);
 #ifndef MM_H_INCLUDED
 #define MM_H_INCLUDED
 
+/* Amalgamated: #include "internal.h" */
 
 typedef void (*gc_cell_destructor_t)(struct v7 *v7, void *);
 
@@ -1513,6 +1620,10 @@ struct gc_arena {
 };
 
 #endif /* GC_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/internal.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1521,6 +1632,7 @@ struct gc_arena {
 #ifndef V7_INTERNAL_H_INCLUDED
 #define V7_INTERNAL_H_INCLUDED
 
+/* Amalgamated: #include "license.h" */
 
 /* Check whether we're compiling in an environment with no filesystem */
 #if defined(ARDUINO) && (ARDUINO == 106)
@@ -1575,6 +1687,7 @@ struct gc_arena {
 #include <setjmp.h>
 
 /* Public API. Implemented in api.c */
+/* Amalgamated: #include "../v7.h" */
 
 #ifdef V7_WINDOWS
 #define vsnprintf _vsnprintf
@@ -1598,8 +1711,19 @@ typedef unsigned long uintptr_t;
 #include <stdint.h>
 #endif
 
+/* Amalgamated: #include "v7_features.h" */
 
 /* Private API */
+/* Amalgamated: #include "utf.h" */
+/* Amalgamated: #include "str_util.h" */
+/* Amalgamated: #include "mbuf.h" */
+/* Amalgamated: #include "tokenizer.h" */
+/* Amalgamated: #include "slre.h" */
+/* Amalgamated: #include "varint.h" */
+/* Amalgamated: #include "ast.h" */
+/* Amalgamated: #include "parser.h" */
+/* Amalgamated: #include "mm.h" */
+/* Amalgamated: #include "builtin.h" */
 
 /* Max captures for String.replace() */
 #define V7_RE_MAX_REPL_SUB 255
@@ -1719,6 +1843,8 @@ enum error_ctor {
   ERROR_CTOR_MAX
 };
 
+/* Amalgamated: #include "vm.h" */
+/* Amalgamated: #include "compiler.h" */
 
 struct v7 {
   val_t global_object;
@@ -1736,11 +1862,10 @@ struct v7 {
 
   /*
    * Stack of execution contexts.
-   * Each execution context object in the call stack has hidden properties:
-   *  *  "_p": Parent context (for closures)
-   *  *  "_e": Exception environment
+   * Execution contexts are contained in two chains:
+   * - in the lexical scope via their prototype chain (to allow variable lookup)
+   * - call stack for stack traces (via the ____p hidden property)
    *
-   * Hidden properties have V7_PROPERTY_HIDDEN flag set.
    * Execution contexts should be allocated on heap, because they might not be
    * on a call stack but still referenced (closures).
    */
@@ -1859,13 +1984,16 @@ V7_PRIVATE size_t unescape(const char *s, size_t len, char *to);
 
 V7_PRIVATE void init_js_stdlib(struct v7 *);
 
+#if V7_ENABLE__RegExp
 V7_PRIVATE val_t Regex_ctor(struct v7 *v7, val_t this_obj, val_t args);
+V7_PRIVATE val_t rx_exec(struct v7 *v7, val_t rx, val_t str, int lind);
+#endif
 
 V7_PRIVATE double v7_char_code_at(struct v7 *v7, val_t s, val_t at);
 
-V7_PRIVATE val_t rx_exec(struct v7 *v7, val_t rx, val_t str, int lind);
-
+#if V7_ENABLE__Memory__stats
 V7_PRIVATE size_t gc_arena_size(struct gc_arena *);
+#endif
 
 V7_PRIVATE v7_val_t
 i_apply(struct v7 *, val_t func, val_t this_obj, val_t args);
@@ -1875,6 +2003,10 @@ i_apply(struct v7 *, val_t func, val_t this_obj, val_t args);
 #endif /* __cplusplus */
 
 #endif /* V7_INTERNAL_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/vm.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1883,6 +2015,7 @@ i_apply(struct v7 *, val_t func, val_t this_obj, val_t args);
 #ifndef VM_H_INCLUDED
 #define VM_H_INCLUDED
 
+/* Amalgamated: #include "internal.h" */
 
 /* TODO(mkm): remove ifdef once v7 has been moved here */
 #ifndef V7_VALUE_DEFINED
@@ -2023,7 +2156,6 @@ enum v7_type val_type(struct v7 *v7, val_t);
 int v7_is_error(struct v7 *v7, val_t);
 V7_PRIVATE val_t v7_pointer_to_value(void *);
 
-V7_PRIVATE struct v7_regexp *v7_to_regexp(struct v7 *, val_t);
 val_t v7_object_to_value(struct v7_object *);
 val_t v7_function_to_value(struct v7_function *);
 
@@ -2035,12 +2167,19 @@ V7_PRIVATE void init_object(struct v7 *v7);
 V7_PRIVATE void init_array(struct v7 *v7);
 V7_PRIVATE void init_error(struct v7 *v7);
 V7_PRIVATE void init_boolean(struct v7 *v7);
+#if V7_ENABLE__Math
 V7_PRIVATE void init_math(struct v7 *v7);
+#endif
 V7_PRIVATE void init_string(struct v7 *v7);
+#if V7_ENABLE__RegExp
 V7_PRIVATE void init_regex(struct v7 *v7);
+V7_PRIVATE struct v7_regexp *v7_to_regexp(struct v7 *, val_t);
+#endif
 V7_PRIVATE void init_number(struct v7 *v7);
 V7_PRIVATE void init_json(struct v7 *v7);
+#if V7_ENABLE__Date
 V7_PRIVATE void init_date(struct v7 *v7);
+#endif
 V7_PRIVATE void init_function(struct v7 *v7);
 V7_PRIVATE void init_stdlib(struct v7 *v7);
 
@@ -2090,6 +2229,7 @@ V7_PRIVATE struct v7_property *v7_next_prop(struct v7 *, val_t,
                                             struct v7_property *);
 V7_PRIVATE val_t v7_iter_get_value(struct v7 *, val_t, struct v7_property *);
 V7_PRIVATE val_t v7_iter_get_name(struct v7 *, struct v7_property *);
+V7_PRIVATE uint8_t v7_iter_get_attrs(struct v7_property *);
 V7_PRIVATE val_t v7_iter_get_index(struct v7 *, struct v7_property *);
 
 /*
@@ -2129,6 +2269,10 @@ V7_PRIVATE void release_ast(struct v7 *, struct ast *);
 #endif /* __cplusplus */
 
 #endif /* VM_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/compiler.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2137,6 +2281,9 @@ V7_PRIVATE void release_ast(struct v7 *, struct ast *);
 #ifndef COMPILER_H_INCLUDED
 #define COMPILER_H_INCLUDED
 
+#ifdef V7_ENABLE_BCODE
+
+/* Amalgamated: #include "internal.h" */
 
 #if defined(__cplusplus)
 extern "C" {
@@ -2197,7 +2344,13 @@ V7_PRIVATE void eval_bcode(struct v7 *, struct bcode *);
 }
 #endif /* __cplusplus */
 
+#endif /* V7_ENABLE_BCODE */
+
 #endif /* COMPILER_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/gc.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2206,6 +2359,8 @@ V7_PRIVATE void eval_bcode(struct v7 *, struct bcode *);
 #ifndef GC_H_INCLUDED
 #define GC_H_INCLUDED
 
+/* Amalgamated: #include "internal.h" */
+/* Amalgamated: #include "vm.h" */
 
 #define MARK(p) (((struct gc_cell *) (p))->head.word |= 1)
 #define UNMARK(p) (((struct gc_cell *) (p))->head.word &= ~1)
@@ -2242,7 +2397,6 @@ V7_PRIVATE void gc_mark(struct v7 *, val_t);
 
 V7_PRIVATE void gc_arena_init(struct gc_arena *, size_t, size_t, size_t,
                               const char *);
-V7_PRIVATE void gc_arena_grow(struct v7 *, struct gc_arena *, size_t);
 V7_PRIVATE void gc_arena_destroy(struct v7 *, struct gc_arena *a);
 V7_PRIVATE void gc_sweep(struct v7 *, struct gc_arena *, size_t);
 V7_PRIVATE void *gc_alloc_cell(struct v7 *, struct gc_arena *);
@@ -2256,6 +2410,10 @@ V7_PRIVATE void tmp_stack_push(struct gc_tmp_frame *, val_t *);
 #endif /* __cplusplus */
 
 #endif /* GC_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/slre.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2346,6 +2504,10 @@ int slre_get_flags(struct slre_prog *);
 #endif /* V7_ENABLE__RegExp */
 
 #endif /* SLRE_HEADER_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/varint.h"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2354,6 +2516,7 @@ int slre_get_flags(struct slre_prog *);
 #ifndef V7_VARINT_H_INCLUDED
 #define V7_VARINT_H_INCLUDED
 
+/* Amalgamated: #include "internal.h" */
 
 #if defined(__cplusplus)
 extern "C" {
@@ -2368,6 +2531,10 @@ V7_PRIVATE int calc_llen(size_t len);
 #endif /* __cplusplus */
 
 #endif /* V7_VARINT_H_INCLUDED */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/mbuf.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2377,6 +2544,7 @@ V7_PRIVATE int calc_llen(size_t len);
 
 #include <assert.h>
 #include <string.h>
+/* Amalgamated: #include "mbuf.h" */
 
 #ifndef MBUF_REALLOC
 #define MBUF_REALLOC realloc
@@ -2456,6 +2624,10 @@ void mbuf_remove(struct mbuf *mb, size_t n) {
 }
 
 #endif /* EXCLUDE_COMMON */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/utf.c"
+/**/
+#endif
 /*
  * The authors of this software are Rob Pike and Ken Thompson.
  *              Copyright (c) 2002 by Lucent Technologies.
@@ -2477,6 +2649,8 @@ void mbuf_remove(struct mbuf *mb, size_t n) {
 #endif
 #include <stdarg.h>
 #include <string.h>
+/* Amalgamated: #include "internal.h" */
+/* Amalgamated: #include "utf.h" */
 
 #if V7_ENABLE__UTF
 enum {
@@ -2682,6 +2856,7 @@ char *utfnshift(char *s, long m) {
  */
 #include <stdarg.h>
 #include <string.h>
+/* Amalgamated: #include "utf.h" */
 
 /*
  * alpha ranges -
@@ -3815,6 +3990,10 @@ char *utfnshift(char *s, long m) {
 #endif /* V7_ENABLE__UTF */
 
 #endif /* EXCLUDE_COMMON */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/base64.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -3822,6 +4001,7 @@ char *utfnshift(char *s, long m) {
 
 #ifndef EXCLUDE_COMMON
 
+/* Amalgamated: #include "base64.h" */
 
 void cs_base64_encode(const unsigned char *src, int src_len, char *dst) {
   static const char *b64 =
@@ -3908,6 +4088,10 @@ int cs_base64_decode(const unsigned char *s, int len, char *dst) {
 }
 
 #endif /* EXCLUDE_COMMON */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/md5.c"
+/**/
+#endif
 /*
  * This code implements the MD5 message-digest algorithm.
  * The algorithm is due to Ron Rivest.  This code was
@@ -3927,6 +4111,7 @@ int cs_base64_decode(const unsigned char *s, int len, char *dst) {
 
 #if !defined(DISABLE_MD5) && !defined(EXCLUDE_COMMON)
 
+/* Amalgamated: #include "md5.h" */
 
 static void byteReverse(unsigned char *buf, unsigned longs) {
 /* Forrest: MD5 expect LITTLE_ENDIAN, swap if BIG_ENDIAN */
@@ -4113,14 +4298,20 @@ void MD5_Final(unsigned char digest[16], MD5_CTX *ctx) {
 }
 
 #endif /* EXCLUDE_COMMON */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/sha1.c"
+/**/
+#endif
 /* Copyright(c) By Steve Reid <steve@edmweb.com> */
 /* 100% Public Domain */
 
 #if !defined(DISABLE_SHA1) && !defined(EXCLUDE_COMMON)
 
+/* Amalgamated: #include "sha1.h" */
 
 #define SHA1HANDSOFF
 #if defined(__sun)
+/* Amalgamated: #include "solarisfixes.h" */
 #endif
 
 union char64long16 {
@@ -4361,6 +4552,10 @@ void hmac_sha1(const unsigned char *key, size_t keylen,
 }
 
 #endif /* EXCLUDE_COMMON */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/str_util.c"
+/**/
+#endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -4368,6 +4563,8 @@ void hmac_sha1(const unsigned char *key, size_t keylen,
 
 #ifndef EXCLUDE_COMMON
 
+/* Amalgamated: #include "osdep.h" */
+/* Amalgamated: #include "str_util.h" */
 
 #define C_SNPRINTF_APPEND_CHAR(ch)       \
   do {                                   \
@@ -4571,6 +4768,10 @@ void to_wchar(const char *path, wchar_t *wbuf, size_t wbuf_len) {
 #endif /* _WIN32 */
 
 #endif /* EXCLUDE_COMMON */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../../common/dirent.c"
+/**/
+#endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -4578,6 +4779,7 @@ void to_wchar(const char *path, wchar_t *wbuf, size_t wbuf_len) {
 
 #ifndef EXCLUDE_COMMON
 
+/* Amalgamated: #include "osdep.h" */
 
 /*
  * This file contains POSIX opendir/closedir/readdir API implementation
@@ -4660,11 +4862,20 @@ struct dirent *readdir(DIR *dir) {
 #endif
 
 #endif /* EXCLUDE_COMMON */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../builtin/file.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "v7.h" */
+/* Amalgamated: #include "osdep.h" */
+/* Amalgamated: #include "mbuf.h" */
+
+/* Amalgamated: #include "v7_features.h" */
 
 #if defined(V7_ENABLE_FILE) && !defined(V7_NO_FS)
 
@@ -4703,7 +4914,7 @@ int closedir(DIR *dir) {
 struct dirent *readdir(DIR *dir) {
   return SPIFFS_readdir(&dir->dh, &dir->de);
 }
-#endif
+#endif /* V7_ENABLE_SPIFFS */
 
 static v7_val_t s_file_proto;
 static const char s_fd_prop[] = "__fd";
@@ -4862,6 +5073,7 @@ static v7_val_t File_remove(struct v7 *v7, v7_val_t this_obj, v7_val_t args) {
   return v7_create_number(res == 0 ? 0 : errno);
 }
 
+#if V7_ENABLE__File__list
 static v7_val_t File_list(struct v7 *v7, v7_val_t this_obj, v7_val_t args) {
   v7_val_t arg0 = v7_array_get(v7, args, 0);
   v7_val_t result = v7_create_undefined();
@@ -4878,12 +5090,14 @@ static v7_val_t File_list(struct v7 *v7, v7_val_t this_obj, v7_val_t args) {
       result = v7_create_array(v7);
       while ((dp = readdir(dirp)) != NULL) {
         /* Do not show current and parent dirs */
-        if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) {
+        if (strcmp((const char *) dp->d_name, ".") == 0 ||
+            strcmp((const char *) dp->d_name, "..") == 0) {
           continue;
         }
         /* Add file name to the list */
         v7_array_push(v7, result,
-                      v7_create_string(v7, dp->d_name, strlen(dp->d_name), 1));
+                      v7_create_string(v7, (const char *) dp->d_name,
+                                       strlen((const char *) dp->d_name), 1));
       }
       closedir(dirp);
     }
@@ -4891,6 +5105,7 @@ static v7_val_t File_list(struct v7 *v7, v7_val_t this_obj, v7_val_t args) {
 
   return result;
 }
+#endif /* V7_ENABLE__File__list */
 
 void init_file(struct v7 *v7) {
   v7_val_t file_obj = v7_create_object(v7);
@@ -4902,7 +5117,9 @@ void init_file(struct v7 *v7) {
   v7_set_method(v7, file_obj, "remove", File_remove);
   v7_set_method(v7, file_obj, "rename", File_rename);
   v7_set_method(v7, file_obj, "open", File_open);
+#if V7_ENABLE__File__list
   v7_set_method(v7, file_obj, "list", File_list);
+#endif
 
   v7_set_method(v7, s_file_proto, "close", File_close);
   v7_set_method(v7, s_file_proto, "read", File_read);
@@ -4913,12 +5130,19 @@ void init_file(struct v7 *v7) {
 void init_file(struct v7 *v7) {
   (void) v7;
 }
+#endif /* NO_LIBC */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../builtin/socket.c"
+/**/
 #endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "v7.h" */
+/* Amalgamated: #include "osdep.h" */
+/* Amalgamated: #include "mbuf.h" */
 
 #ifdef V7_ENABLE_SOCKET
 
@@ -5134,6 +5358,10 @@ void init_socket(struct v7 *v7) {
   (void) v7;
 }
 #endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/../builtin/crypto.c"
+/**/
+#endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -5142,6 +5370,10 @@ void init_socket(struct v7 *v7) {
 #include <stdlib.h>
 #include <string.h>
 
+/* Amalgamated: #include "v7.h" */
+/* Amalgamated: #include "md5.h" */
+/* Amalgamated: #include "sha1.h" */
+/* Amalgamated: #include "base64.h" */
 
 #ifdef V7_ENABLE_CRYPTO
 
@@ -5275,11 +5507,16 @@ void init_crypto(struct v7 *v7) {
   (void) v7;
 #endif
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/varint.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 /*
  * Strings in AST are encoded as tuples (length, string).
@@ -5330,11 +5567,16 @@ V7_PRIVATE int encode_varint(size_t len, unsigned char *p) {
 
   return llen;
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/tokenizer.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 /*
  * NOTE(lsm): Must be in the same order as enum for keywords. See comment
@@ -5798,16 +6040,22 @@ int main(void) {
   return 0;
 }
 #endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/ast.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #ifdef V7_LARGE_AST
 typedef uint32_t ast_skip_t;
 #else
 typedef uint16_t ast_skip_t;
+#define AST_SKIP_MAX UINT16_MAX
 #endif
 
 #ifndef V7_DISABLE_AST_TAG_NAMES
@@ -6254,9 +6502,18 @@ V7_PRIVATE ast_off_t ast_modify_skip(struct ast *a, ast_off_t start,
                                      enum ast_which_skip skip) {
   uint8_t *p = (uint8_t *) a->mbuf.buf + start + skip * sizeof(ast_skip_t);
   ast_skip_t delta = where - start;
+#ifndef NDEBUG
   enum ast_tag tag = (enum ast_tag)(uint8_t) * (a->mbuf.buf + start - 1);
   const struct ast_node_def *def = &ast_node_defs[tag];
+#endif
   assert(start <= where);
+
+#ifndef V7_LARGE_AST
+  /* the value of delta overflowed, therefore the ast is not useable */
+  if (where - start > AST_SKIP_MAX) {
+    a->has_overflow = 1;
+  }
+#endif
 
   /* assertion, to be optimizable out */
   assert((int) skip < def->num_skips);
@@ -6438,6 +6695,7 @@ static void ast_dump_tree(FILE *fp, struct ast *a, ast_off_t *pos, int depth) {
 V7_PRIVATE void ast_init(struct ast *ast, size_t len) {
   mbuf_init(&ast->mbuf, len);
   ast->refcnt = 0;
+  ast->has_overflow = 0;
 }
 
 V7_PRIVATE void ast_optimize(struct ast *ast) {
@@ -6450,6 +6708,8 @@ V7_PRIVATE void ast_optimize(struct ast *ast) {
 
 V7_PRIVATE void ast_free(struct ast *ast) {
   mbuf_free(&ast->mbuf);
+  ast->refcnt = 0;
+  ast->has_overflow = 0;
 }
 
 #ifndef NO_LIBC
@@ -6480,11 +6740,18 @@ enum v7_err v7_compile(const char *code, int binary, FILE *fp) {
   return err;
 }
 #endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/vm.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
+/* Amalgamated: #include "gc.h" */
+/* Amalgamated: #include "osdep.h" */
 
 #ifdef HAS_V7_INFINITY
 double _v7_infinity;
@@ -6597,6 +6864,7 @@ int v7_is_array(struct v7 *v7, val_t v) {
   return v7_is_object(v) && is_prototype_of(v7, v, v7->array_prototype);
 }
 
+#if V7_ENABLE__RegExp
 V7_PRIVATE struct v7_regexp *v7_to_regexp(struct v7 *v7, val_t v) {
   struct v7_property *p;
   int is = v7_is_regexp(v7, v);
@@ -6605,6 +6873,7 @@ V7_PRIVATE struct v7_regexp *v7_to_regexp(struct v7 *v7, val_t v) {
   assert(p != NULL);
   return (struct v7_regexp *) v7_to_pointer(p->value);
 }
+#endif
 
 int v7_is_null(val_t v) {
   return v == V7_NULL;
@@ -6858,6 +7127,16 @@ static int snquote(char *buf, size_t size, const char *s, size_t len) {
     if (*s == '"') {
       i++;
       if (buf < limit) *buf++ = '\\';
+    } else if (*s == '\n') {
+      i++;
+      if (buf < limit) *buf++ = '\\';
+      if (buf < limit) *buf++ = 'n';
+      continue;
+    } else if (*s == '\t') {
+      i++;
+      if (buf < limit) *buf++ = '\\';
+      if (buf < limit) *buf++ = 't';
+      continue;
     }
     i++;
     if (buf < limit) *buf++ = *s;
@@ -6963,15 +7242,20 @@ V7_PRIVATE int to_str(struct v7 *v7, val_t v, char *buf, size_t size,
       struct v7_property *p;
       mbuf_append(&v7->json_visited_stack, (char *) &v, sizeof(v));
       b += c_snprintf(b, BUF_LEFT(size, b - buf), "{");
-      for (p = v7_to_object(v)->properties; p; p = p->next) {
+      for (p = v7_next_prop(v7, v, NULL); p != NULL;
+           p = v7_next_prop(v7, v, p)) {
         size_t n;
         const char *s;
-        if (p->attributes & (V7_PROPERTY_HIDDEN | V7_PROPERTY_DONT_ENUM)) {
+        val_t name;
+        if (v7_iter_get_attrs(p) &
+            (V7_PROPERTY_HIDDEN | V7_PROPERTY_DONT_ENUM)) {
           continue;
         }
-        s = v7_to_string(v7, &p->name, &n);
+        name = v7_iter_get_name(v7, p);
+        s = v7_to_string(v7, &name, &n);
         b += c_snprintf(b, BUF_LEFT(size, b - buf), "\"%.*s\":", (int) n, s);
-        b += to_str(v7, p->value, b, BUF_LEFT(size, b - buf), 1);
+        b += to_str(v7, v7_iter_get_value(v7, v, p), b, BUF_LEFT(size, b - buf),
+                    1);
         if (p->next) {
           b += c_snprintf(b, BUF_LEFT(size, b - buf), ",");
         }
@@ -7488,6 +7772,9 @@ V7_PRIVATE struct v7_property *v7_next_prop(struct v7 *v7, val_t obj,
                                             struct v7_property *p) {
   if (p == NULL && v7_to_object(obj)->attributes & V7_OBJ_DENSE_ARRAY) {
     unsigned long len = v7_array_length(v7, obj);
+    if (len == 0) {
+      return NULL;
+    }
     return PACK_ITER(len, 0);
   } else if (IS_PACKED_ITER(p)) {
     unsigned long len = UNPACK_ITER_LEN(p);
@@ -7508,6 +7795,10 @@ V7_PRIVATE val_t v7_iter_get_name(struct v7 *v7, struct v7_property *p) {
   return IS_PACKED_ITER(p) ? ulong_to_str(v7, UNPACK_ITER_IDX(p)) : p->name;
 }
 
+V7_PRIVATE uint8_t v7_iter_get_attrs(struct v7_property *p) {
+  return IS_PACKED_ITER(p) ? 0 : p->attributes;
+}
+
 /* return array index as number or undefined. works with iterators */
 V7_PRIVATE val_t v7_iter_get_index(struct v7 *v7, struct v7_property *p) {
   int ok;
@@ -7516,14 +7807,13 @@ V7_PRIVATE val_t v7_iter_get_index(struct v7 *v7, struct v7_property *p) {
     return v7_create_number(UNPACK_ITER_IDX(p));
   }
   res = str_to_ulong(v7, p->name, &ok);
-  if (!ok) return v7_create_undefined();
+  if (!ok || res >= UINT32_MAX) return v7_create_undefined();
   return v7_create_number(res);
 }
 
 unsigned long v7_array_length(struct v7 *v7, val_t v) {
   struct v7_property *p;
-  unsigned long key, len = 0;
-  char *end;
+  unsigned long len = 0;
 
   if (!v7_is_object(v)) {
     return 0;
@@ -7539,13 +7829,10 @@ unsigned long v7_array_length(struct v7 *v7, val_t v) {
     return abuf->len / sizeof(val_t);
   }
 
-  for (p = v7_to_object(v)->properties; p != NULL; p = p->next) {
-    size_t n;
-    const char *s = v7_to_string(v7, &p->name, &n);
-    key = strtoul(s, &end, 10);
-    /* Array length could not be more then 2^32 */
-    if (end > s && *end == '\0' && key >= len && key < 4294967295UL) {
-      len = key + 1;
+  for (p = v7_next_prop(v7, v, NULL); p != NULL; p = v7_next_prop(v7, v, p)) {
+    val_t idx = v7_iter_get_index(v7, p);
+    if (!v7_is_undefined(idx) && v7_to_number(idx) >= len) {
+      len = v7_to_number(idx) + 1;
     }
   }
 
@@ -8061,9 +8348,6 @@ val_t v7_get_global_object(struct v7 *v7) {
 }
 
 void v7_destroy(struct v7 *v7) {
-#if 0
-  struct ast **a;
-#endif
   if (v7 != NULL) {
     mbuf_free(&v7->owned_strings);
     mbuf_free(&v7->foreign_strings);
@@ -8121,11 +8405,17 @@ int v7_disown(struct v7 *v7, v7_val_t *v) {
 
   return 0;
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/gc.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
+/* Amalgamated: #include "gc.h" */
 
 #if V7_ENABLE__Memory__stats
 int v7_heap_stat(struct v7 *v7, enum v7_heap_stat_what what);
@@ -8594,7 +8884,7 @@ void gc_dump_owned_strings(struct v7 *v7) {
   }
 #else
   for (i = 0; i < v7->owned_strings.len; i++) {
-    if (isprint(v7->owned_strings.buf[i])) {
+    if (isprint((unsigned char) v7->owned_strings.buf[i])) {
       printf("%c", v7->owned_strings.buf[i]);
     } else {
       printf(".");
@@ -8749,11 +9039,16 @@ void v7_gc(struct v7 *v7, int full) {
   (void) full;
 }
 #endif /* V7_DISABLE_GC */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/parser.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #define ACCEPT(t) (((v7)->cur_tok == (t)) ? next_tok((v7)), 1 : 0)
 
@@ -9668,6 +9963,11 @@ V7_PRIVATE enum v7_err parse(struct v7 *v7, struct ast *a, const char *src,
 
   next_tok(v7);
   err = parse_script(v7, a);
+  if (a->has_overflow) {
+    c_snprintf(v7->error_msg, sizeof(v7->error_msg),
+               "script too large (try V7_LARGE_AST build option)");
+    return V7_AST_TOO_LARGE;
+  }
   if (err == V7_OK && v7->cur_tok != TOK_END_OF_INPUT) {
 #ifndef NO_LIBC
     fprintf(stderr, "WARNING parse input not consumed\n");
@@ -9685,11 +9985,18 @@ V7_PRIVATE enum v7_err parse(struct v7 *v7, struct ast *a, const char *src,
 const char *v7_get_parser_error(struct v7 *v7) {
   return v7->error_msg;
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/interpreter.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
+/* Amalgamated: #include "gc.h" */
+/* Amalgamated: #include "osdep.h" */
 
 #undef siglongjmp
 #undef sigsetjmp
@@ -9750,6 +10057,20 @@ void v7_throw(struct v7 *v7, const char *err_fmt, ...) {
   c_vsnprintf(v7->error_msg, sizeof(v7->error_msg), err_fmt, ap);
   va_end(ap);
   v7_throw_value(v7, create_exception(v7, TYPE_ERROR, v7->error_msg));
+}
+
+void v7_fprint_stack_trace(FILE *f, struct v7 *v7, val_t e) {
+  val_t frame, func, args;
+
+  for (frame = v7_get(v7, e, "stack", ~0); v7_is_object(frame);
+       frame = v7_get(v7, frame, "____p", ~0)) {
+    args = v7_get(v7, frame, "arguments", ~0);
+    if (v7_is_object(args)) {
+      func = v7_get(v7, args, "callee", ~0);
+      fprintf(f, "   at: ");
+      v7_fprintln(f, v7, func);
+    }
+  }
 }
 
 V7_PRIVATE val_t i_value_of(struct v7 *v7, val_t v) {
@@ -10484,6 +10805,9 @@ static NOINLINE val_t i_eval_expr_uncommon(struct v7 *v7, struct ast *a,
         case V7_TYPE_CFUNCTION:
           res = v7_create_string(v7, "function", 8, 1);
           break;
+        case V7_TYPE_UNDEFINED:
+          res = v7_create_string(v7, "undefined", 9, 1);
+          break;
         default:
           res = v7_create_string(v7, "object", 6, 1);
           break;
@@ -10676,6 +11000,9 @@ V7_PRIVATE val_t i_prepare_call(struct v7 *v7, struct v7_function *func,
 
   frame = v7_create_object(v7);
   v7_to_object(frame)->prototype = func->scope;
+#if V7_ENABLE__StackTrace
+  v7_set(v7, frame, "____p", 5, V7_PROPERTY_HIDDEN, v7->call_stack);
+#endif
 
   tmp_stack_push(&tf, &frame);
   i_populate_local_vars(v7, func->ast, fstart, fvar, frame);
@@ -10815,6 +11142,10 @@ static val_t i_eval_call(struct v7 *v7, struct ast *a, ast_off_t *pos,
   }
 
   if (!v7_is_undefined(args)) {
+#if V7_ENABLE__StackTrace
+    v7_set(v7, args, "callee", ~0, 0, v1);
+#endif
+
 #ifndef V7_DISABLE_PREDEFINED_STRINGS
     v7_set_v(v7, frame, v7->predefined_strings[PREDEFINED_STR_ARGUMENTS], args);
 #else
@@ -11031,51 +11362,16 @@ static val_t i_eval_stmt(struct v7 *v7, struct ast *a, ast_off_t *pos,
       ast_skip_tree(a, pos);
       loop = *pos;
 
-      /* first iterate on dense array elements if any */
-      /* TODO(mkm): make it DRY */
-      if (v7_to_object(obj)->attributes & V7_OBJ_DENSE_ARRAY) {
-        struct v7_property *p =
-            v7_get_own_property2(v7, obj, "", 0, V7_PROPERTY_HIDDEN);
-        struct mbuf *abuf;
-        if (p != NULL) {
-          abuf = (struct mbuf *) v7_to_foreign(p->value);
-          if (abuf != NULL) {
-            unsigned long i, len = v7_array_length(v7, obj);
-            for (i = 0; i < len; i++, *pos = loop) {
-              key = ulong_to_str(v7, i);
-              if ((var = v7_get_property(v7, scope, name, name_len)) != NULL) {
-                var->value = key;
-              } else {
-                v7_set_property(v7, v7->global_object, name, name_len, 0, key);
-              }
-              res = i_eval_stmts(v7, a, pos, end, scope,
-                                 brk); /* LCOV_EXCL_LINE */
-              switch (*brk) {          /* LCOV_EXCL_LINE */
-                case B_RUN:
-                  break;
-                case B_CONTINUE:
-                  *brk = B_RUN;
-                  break;
-                case B_BREAK:
-                  *brk = B_RUN; /* fall through */
-                case B_RETURN:
-                  *pos = end;
-                  goto cleanup;
-              }
-            }
-          }
-        }
-      }
-      loop = *pos;
-
       for (; v7_to_object(obj) != NULL;
            obj = v7_object_to_value(
                v7_is_function(obj) ? NULL : v7_to_object(obj)->prototype)) {
-        for (p = v7_to_object(obj)->properties; p; p = p->next, *pos = loop) {
-          if (p->attributes & (V7_PROPERTY_HIDDEN | V7_PROPERTY_DONT_ENUM)) {
+        for (p = v7_next_prop(v7, obj, NULL); p;
+             p = v7_next_prop(v7, obj, p), *pos = loop) {
+          if (v7_iter_get_attrs(p) &
+              (V7_PROPERTY_HIDDEN | V7_PROPERTY_DONT_ENUM)) {
             continue;
           }
-          key = p->name;
+          key = v7_iter_get_name(v7, p);
           if ((var = v7_get_property(v7, scope, name, name_len)) != NULL) {
             var->value = key;
           } else {
@@ -11296,17 +11592,20 @@ cleanup:
   return res;
 }
 
-v7_val_t v7_apply(struct v7 *v7, v7_val_t func, v7_val_t this_obj,
-                  v7_val_t args) {
-  v7_val_t res;
+enum v7_err v7_apply(struct v7 *v7, v7_val_t *result, v7_val_t func,
+                     v7_val_t this_obj, v7_val_t args) {
+  enum v7_err err = V7_OK;
   jmp_buf saved_jmp_buf;
   memcpy(&saved_jmp_buf, &v7->jmp_buf, sizeof(saved_jmp_buf));
   if (sigsetjmp(v7->jmp_buf, 0) != 0) {
-    return v7->thrown_error;
+    *result = v7->thrown_error;
+    err = V7_EXEC_EXCEPTION;
+    goto cleanup;
   }
-  res = i_apply(v7, func, this_obj, args);
+  *result = i_apply(v7, func, this_obj, args);
+cleanup:
   memcpy(&v7->jmp_buf, &saved_jmp_buf, sizeof(saved_jmp_buf));
-  return res;
+  return err;
 }
 
 /* Invoke a function applying the argument array */
@@ -11518,11 +11817,16 @@ enum v7_err v7_exec_file(struct v7 *v7, val_t *res, const char *path) {
   return err;
 }
 #endif
+#ifdef V7_MODULE_LINES
+#line 1 "./src/compiler.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #ifdef V7_ENABLE_BCODE
 
@@ -11709,11 +12013,16 @@ V7_PRIVATE void eval_bcode(struct v7 *v7, struct bcode *bcode) {
 }
 
 #endif /* V7_ENABLE_BCODE */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/stdlib.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #ifdef NO_LIBC
 void print_str(const char *str);
@@ -11908,11 +12217,16 @@ V7_PRIVATE void init_stdlib(struct v7 *v7) {
   init_function(v7);
   init_js_stdlib(v7);
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/js_stdlib.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #define STRINGIFY(x) #x
 
@@ -12023,6 +12337,10 @@ static const char * const js_functions[] = {
     };));
 #endif
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/slre.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -12041,6 +12359,7 @@ static const char * const js_functions[] = {
  * license, as set out in <https://www.cesanta.com/license>.
  */
 
+/* Amalgamated: #include "v7_features.h" */
 
 #include <setjmp.h>
 #include <stdlib.h>
@@ -12051,6 +12370,8 @@ static const char * const js_functions[] = {
 #include <ctype.h>
 #endif
 
+/* Amalgamated: #include "utf.h" */
+/* Amalgamated: #include "slre.h" */
 
 /* Limitations */
 #define SLRE_MAX_RANGES 32
@@ -13688,11 +14009,16 @@ int main(int argc, char **argv) {
 #endif /* SLRE_TEST */
 
 #endif /* V7_ENABLE__RegExp */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_object.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #if V7_ENABLE__Object__getPrototypeOf
 static val_t Obj_getPrototypeOf(struct v7 *v7, val_t this_obj, val_t args) {
@@ -13743,6 +14069,9 @@ static val_t _Obj_ownKeys(struct v7 *v7, val_t args,
 }
 #endif
 
+#if V7_ENABLE__Object__hasOwnProperty ||       \
+    V7_ENABLE__Object__propertyIsEnumerable || \
+    V7_ENABLE__Object__getOwnPropertyDescriptor
 static struct v7_property *_Obj_getOwnProperty(struct v7 *v7, val_t obj,
                                                val_t name) {
   char name_buf[512];
@@ -13750,6 +14079,7 @@ static struct v7_property *_Obj_getOwnProperty(struct v7 *v7, val_t obj,
   name_len = v7_stringify_value(v7, name, name_buf, sizeof(name_buf));
   return v7_get_own_property(v7, obj, name_buf, name_len);
 }
+#endif
 
 #if V7_ENABLE__Object__keys
 static val_t Obj_keys(struct v7 *v7, val_t this_obj, val_t args) {
@@ -13842,6 +14172,7 @@ static val_t Obj_defineProperty(struct v7 *v7, val_t this_obj, val_t args) {
   return _Obj_defineProperty(v7, obj, name_buf, name_len, desc);
 }
 
+#if V7_ENABLE__Object__create || V7_ENABLE__Object__defineProperties
 static void o_define_props(struct v7 *v7, val_t obj, val_t descs) {
   struct v7_property *p;
   if (!v7_is_object(descs)) {
@@ -13856,6 +14187,7 @@ static void o_define_props(struct v7 *v7, val_t obj, val_t descs) {
     _Obj_defineProperty(v7, obj, s, n, p->value);
   }
 }
+#endif
 
 #if V7_ENABLE__Object__defineProperties
 static val_t Obj_defineProperties(struct v7 *v7, val_t this_obj, val_t args) {
@@ -14026,11 +14358,16 @@ V7_PRIVATE void init_object(struct v7 *v7) {
 #endif
   set_cfunc_prop(v7, v7->object_prototype, "valueOf", Obj_valueOf);
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_error.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 static val_t Error_ctor(struct v7 *v7, val_t this_obj, val_t args) {
   val_t arg0 = v7_array_get(v7, args, 0);
@@ -14043,6 +14380,7 @@ static val_t Error_ctor(struct v7 *v7, val_t this_obj, val_t args) {
   }
   /* TODO(mkm): set non enumerable but provide toString method */
   v7_set_property(v7, res, "message", 7, 0, arg0);
+  v7_set_property(v7, res, "stack", 5, V7_PROPERTY_DONT_ENUM, v7->call_stack);
 
   return res;
 }
@@ -14069,11 +14407,16 @@ V7_PRIVATE void init_error(struct v7 *v7) {
     v7->error_objects[i] = error;
   }
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_number.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 static val_t Number_ctor(struct v7 *v7, val_t this_obj, val_t args) {
   val_t arg0 = v7_array_length(v7, args) == 0 ? v7_create_number(0.0)
@@ -14181,11 +14524,16 @@ V7_PRIVATE void init_number(struct v7 *v7) {
   v7_set_property(v7, v7->global_object, "isNaN", 5, V7_PROPERTY_DONT_ENUM,
                   v7_create_cfunction(n_isNaN));
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_json.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 static val_t Json_stringify(struct v7 *v7, val_t this_obj, val_t args) {
   val_t arg0 = v7_array_get(v7, args, 0);
@@ -14207,12 +14555,18 @@ V7_PRIVATE void init_json(struct v7 *v7) {
   set_method(v7, o, "parse", Json_parse, 1);
   v7_set_property(v7, v7->global_object, "JSON", 4, V7_PROPERTY_DONT_ENUM, o);
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_array.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
+/* Amalgamated: #include "gc.h" */
 
 struct a_sort_data {
   struct v7 *v7;
@@ -14729,11 +15083,16 @@ V7_PRIVATE void init_array(struct v7 *v7) {
       v7, v7->array_prototype, "length", 6,
       V7_PROPERTY_GETTER | V7_PROPERTY_SETTER | V7_PROPERTY_DONT_ENUM, length);
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_boolean.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 V7_PRIVATE val_t Boolean_ctor(struct v7 *v7, val_t this_obj, val_t args) {
   val_t v = v7_create_boolean(0); /* false by default */
@@ -14790,11 +15149,16 @@ V7_PRIVATE void init_boolean(struct v7 *v7) {
   set_cfunc_prop(v7, v7->boolean_prototype, "valueOf", Boolean_valueOf);
   set_cfunc_prop(v7, v7->boolean_prototype, "toString", Boolean_toString);
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_math.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #if V7_ENABLE__Math
 
@@ -15013,11 +15377,16 @@ V7_PRIVATE void init_math(struct v7 *v7) {
 }
 
 #endif /* V7_ENABLE__Math */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_string.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 V7_PRIVATE val_t to_string(struct v7 *, val_t);
 
@@ -15683,11 +16052,16 @@ V7_PRIVATE void init_string(struct v7 *v7) {
   v7_set_property(v7, v7->string_prototype, "blen", 4, V7_PROPERTY_GETTER,
                   v7_create_cfunction(Str_blen));
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_date.c"
+/**/
+#endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #if V7_ENABLE__Date
 
@@ -16719,11 +17093,16 @@ V7_PRIVATE void init_date(struct v7 *v7) {
 }
 
 #endif /* V7_ENABLE__Date */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_function.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 static val_t Function_ctor(struct v7 *v7, val_t this_obj, val_t args) {
   long i, num_args = v7_array_length(v7, args);
@@ -16806,11 +17185,16 @@ V7_PRIVATE void init_function(struct v7 *v7) {
                   V7_PROPERTY_GETTER | V7_PROPERTY_DONT_ENUM,
                   v7_create_cfunction(Function_length));
 }
+#ifdef V7_MODULE_LINES
+#line 1 "./src/std_regex.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
 
 #if V7_ENABLE__RegExp
 
@@ -16973,11 +17357,17 @@ V7_PRIVATE void init_regex(struct v7 *v7) {
 }
 
 #endif /* V7_ENABLE__RegExp */
+#ifdef V7_MODULE_LINES
+#line 1 "./src/main.c"
+/**/
+#endif
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
+/* Amalgamated: #include "internal.h" */
+/* Amalgamated: #include "osdep.h" */
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 #define fileno _fileno
@@ -17026,21 +17416,21 @@ static char *read_file(const char *path, size_t *size) {
 }
 
 static void print_error(struct v7 *v7, const char *f, val_t e) {
-  char buf[512];
-  char *s = v7_to_json(v7, e, buf, sizeof(buf));
-  fprintf(stderr, "Exec error [%s]: %s\n", f, s);
-  if (s != buf) {
-    free(s);
-  }
+  fprintf(stderr, "Exec error [%s]: ", f);
+  v7_fprintln(stderr, v7, e);
+#if V7_ENABLE__StackTrace
+  v7_fprint_stack_trace(stderr, v7, e);
+#endif
 }
 
 #if V7_ENABLE__Memory__stats
 static void dump_mm_arena_stats(const char *msg, struct gc_arena *a) {
-  printf("%s: total allocations %lu, total garbage %lu, max %lu, alive %lu\n",
+  printf("%s: total allocations %lu, total garbage %lu, max %" SIZE_T_FMT
+         ", alive %lu\n",
          msg, a->allocations, a->garbage, gc_arena_size(a), a->alive);
   printf(
-      "%s: (bytes: total allocations %lu, total garbage %lu, max %lu, alive "
-      "%lu)\n",
+      "%s: (bytes: total allocations %lu, total garbage %lu, max %" SIZE_T_FMT
+      ", alive %lu)\n",
       msg, a->allocations * a->cell_size, a->garbage * a->cell_size,
       gc_arena_size(a) * a->cell_size, a->alive * a->cell_size);
 }
@@ -17049,8 +17439,8 @@ static void dump_mm_stats(struct v7 *v7) {
   dump_mm_arena_stats("object: ", &v7->object_arena);
   dump_mm_arena_stats("function: ", &v7->function_arena);
   dump_mm_arena_stats("property: ", &v7->property_arena);
-  printf("string arena len: %lu\n", v7->owned_strings.len);
-  printf("Total heap size: %lu\n",
+  printf("string arena len: %" SIZE_T_FMT "\n", v7->owned_strings.len);
+  printf("Total heap size: %" SIZE_T_FMT "\n",
          v7->owned_strings.len +
              gc_arena_size(&v7->object_arena) * v7->object_arena.cell_size +
              gc_arena_size(&v7->function_arena) * v7->function_arena.cell_size +
